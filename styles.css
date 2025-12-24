@@ -391,6 +391,29 @@ body {
   cursor: not-allowed;
 }
 
+.download-btn {
+  background: var(--bg-accent);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.download-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
 /* Response Section */
 .response-section {
   background: var(--bg-card);

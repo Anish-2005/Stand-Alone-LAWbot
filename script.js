@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const queryInput = document.getElementById('queryInput');
   const submitQuery = document.getElementById('submitQuery');
   const responseBox = document.getElementById('responseBox');
+  const downloadPdf = document.getElementById('downloadPdf');
   const scrollToTop = document.getElementById('scrollToTop');
   const scrollToQuery = document.getElementById('scrollToQuery');
   const loadingOverlay = document.getElementById('loadingOverlay');
@@ -49,11 +50,92 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Utility function to parse markdown to HTML
   const parseMarkdownToHTML = (text) => {
-    return text
+    // Ensure text is a string
+    if (typeof text !== 'string') {
+      console.warn('parseMarkdownToHTML received non-string:', text);
+      text = String(text || 'No response content');
+    }
+
+    // Split into lines for better processing
+    const lines = text.split('\n');
+    let html = '';
+    let inList = false;
+    let listType = '';
+
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+
+      // Headers
+      if (line.match(/^### (.*$)/)) {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += `<h3 class="text-lg font-semibold mt-4 mb-2">${line.replace(/^### /, '')}</h3>`;
+        continue;
+      }
+      if (line.match(/^## (.*$)/)) {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += `<h2 class="text-xl font-semibold mt-6 mb-3">${line.replace(/^## /, '')}</h2>`;
+        continue;
+      }
+      if (line.match(/^# (.*$)/)) {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += `<h1 class="text-2xl font-bold mt-8 mb-4">${line.replace(/^# /, '')}</h1>`;
+        continue;
+      }
+
+      // Numbered lists
+      if (line.match(/^\d+\.\s+(.*$)/)) {
+        if (!inList || listType !== 'ol') {
+          if (inList) html += '</ul>';
+          html += '<ol class="list-decimal list-inside space-y-1 my-2 ml-4">';
+          inList = true;
+          listType = 'ol';
+        }
+        html += `<li>${line.replace(/^\d+\.\s+/, '')}</li>`;
+        continue;
+      }
+
+      // Bullet points
+      if (line.match(/^[\*\-]\s+(.*$)/)) {
+        if (!inList || listType !== 'ul') {
+          if (inList) html += '</ul>';
+          html += '<ul class="list-disc list-inside space-y-1 my-2 ml-4">';
+          inList = true;
+          listType = 'ul';
+        }
+        html += `<li>${line.replace(/^[\*\-]\s+/, '')}</li>`;
+        continue;
+      }
+
+      // Empty lines or regular text
+      if (line.trim() === '') {
+        if (inList) {
+          html += '</ul>';
+          inList = false;
+          listType = '';
+        }
+        continue;
+      } else {
+        if (inList) {
+          html += '</ul>';
+          inList = false;
+          listType = '';
+        }
+        // Regular paragraph
+        html += `<p class="mb-3">${line}</p>`;
+      }
+    }
+
+    // Close any open list
+    if (inList) {
+      html += '</ul>';
+    }
+
+    // Final cleanup and formatting
+    return html
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\n/g, '<br />');
+      .replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm">$1</code>')
+      .replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-100 dark:bg-gray-800 p-3 rounded mt-2 mb-2 overflow-x-auto"><code>$1</code></pre>');
   };
 
   // Scroll to top button logic
@@ -222,6 +304,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clear previous response
     responseBox.innerHTML = '';
 
+    // Hide download button when starting new query
+    downloadPdf.style.display = 'none';
+
     try {
       const response = await puter.ai.chat(fullQuery, {
         model: 'gemini-2.0-flash'
@@ -236,10 +321,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (typeof response === 'string') {
         responseText = response;
       } else if (response && typeof response === 'object') {
-        // Try different possible response formats
-        responseText = response.message || response.text || response.content || response.response || response.data;
-        console.log('Extracted text:', responseText);
-        console.log('Extracted text type:', typeof responseText);
+        // Puter.ai returns: { message: { content: "text" }, ... }
+        responseText = response.message?.content || response.content || response.text || response.data;
 
         // If still not a string, stringify the object
         if (typeof responseText !== 'string') {
@@ -249,12 +332,14 @@ document.addEventListener('DOMContentLoaded', function() {
         responseText = 'No response received from AI service';
       }
 
-      console.log('Final responseText:', responseText);
       const parsedResponse = parseMarkdownToHTML(responseText);
 
       // Display response with animation
       responseBox.innerHTML = parsedResponse;
       responseBox.style.animation = 'fadeIn 0.6s ease-out';
+
+      // Show download button
+      downloadPdf.style.display = 'flex';
 
       // Smooth scroll to response
       setTimeout(() => {
@@ -347,6 +432,302 @@ document.addEventListener('DOMContentLoaded', function() {
     queryInput.value = '';
     updateCharCount();
   });
+
+  // PDF Download functionality
+  downloadPdf.addEventListener('click', async () => {
+    try {
+      // Show loading state
+      const originalText = downloadPdf.innerHTML;
+      downloadPdf.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating PDF...';
+      downloadPdf.disabled = true;
+
+      // Create PDF content
+      const pdfContent = createPDFContent(queryInput.value);
+
+      // Generate PDF with proper options
+      const opt = {
+        margin: [10, 10, 10, 10], // top, left, bottom, right margins (reduced)
+        filename: `LawAI_Analysis_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          backgroundColor: '#ffffff' // Ensure white background
+        },
+        jsPDF: {
+          unit: 'mm',
+          format: 'a4',
+          orientation: 'portrait'
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+
+      // Generate and download PDF
+      await html2pdf().set(opt).from(pdfContent).save();
+
+      // Reset button
+      downloadPdf.innerHTML = originalText;
+      downloadPdf.disabled = false;
+
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      alert('Failed to generate PDF. Please try again.');
+
+      // Reset button
+      downloadPdf.innerHTML = '<i class="fas fa-download mr-2"></i>Download PDF';
+      downloadPdf.disabled = false;
+    }
+  });
+
+  // Function to create PDF content
+  function createPDFContent(originalQuery) {
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.cssText = `
+      font-family: 'Times New Roman', serif;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #000000;
+      background-color: #ffffff;
+      max-width: 190mm;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      box-sizing: border-box;
+    `;
+
+    // Add header
+    const header = document.createElement('div');
+    header.style.cssText = `
+      text-align: center;
+      border-bottom: 2px solid #000000;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+      page-break-after: avoid;
+    `;
+
+    const title = document.createElement('h1');
+    title.textContent = 'LawAI Legal Analysis Report';
+    title.style.cssText = `
+      font-size: 20px;
+      font-weight: bold;
+      margin: 0 0 8px 0;
+      color: #000000;
+      font-family: 'Times New Roman', serif;
+    `;
+
+    const subtitle = document.createElement('p');
+    subtitle.textContent = 'Intelligent Legal Assistant for Law Enforcement';
+    subtitle.style.cssText = `
+      font-size: 12px;
+      color: #333333;
+      margin: 0 0 8px 0;
+      font-family: 'Times New Roman', serif;
+    `;
+
+    const date = document.createElement('p');
+    date.textContent = `Generated on: ${new Date().toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })}`;
+    date.style.cssText = `
+      font-size: 10px;
+      color: #666666;
+      margin: 0;
+      font-family: 'Times New Roman', serif;
+    `;
+
+    header.appendChild(title);
+    header.appendChild(subtitle);
+    header.appendChild(date);
+
+    // Add original query section
+    const querySection = document.createElement('div');
+    querySection.style.cssText = `
+      margin-bottom: 15px;
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 3px;
+      border: 1px solid #dddddd;
+      page-break-inside: avoid;
+    `;
+
+    const queryTitle = document.createElement('h2');
+    queryTitle.textContent = 'Original Query';
+    queryTitle.style.cssText = `
+      font-size: 14px;
+      font-weight: bold;
+      margin: 0 0 8px 0;
+      color: #000000;
+      border-bottom: 1px solid #cccccc;
+      padding-bottom: 3px;
+      font-family: 'Times New Roman', serif;
+    `;
+
+    const queryText = document.createElement('p');
+    queryText.textContent = originalQuery || 'N/A';
+    queryText.style.cssText = `
+      margin: 0;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #000000;
+      font-family: 'Times New Roman', serif;
+    `;
+
+    querySection.appendChild(queryTitle);
+    querySection.appendChild(queryText);
+
+    // Add analysis section
+    const analysisSection = document.createElement('div');
+    analysisSection.style.cssText = `margin-bottom: 15px;`;
+
+    const analysisTitle = document.createElement('h2');
+    analysisTitle.textContent = 'Legal Analysis Results';
+    analysisTitle.style.cssText = `
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 12px 0;
+      color: #000000;
+      border-bottom: 1px solid #cccccc;
+      padding-bottom: 5px;
+      font-family: 'Times New Roman', serif;
+      page-break-after: avoid;
+    `;
+
+    analysisSection.appendChild(analysisTitle);
+
+    // Clone and clean the response content
+    const responseClone = responseBox.cloneNode(true);
+
+    // Remove any interactive elements or styling that won't work in PDF
+    const buttons = responseClone.querySelectorAll('button');
+    buttons.forEach(button => button.remove());
+
+    const links = responseClone.querySelectorAll('a');
+    links.forEach(link => {
+      link.style.color = '#000';
+      link.style.textDecoration = 'underline';
+    });
+
+    // Apply PDF-friendly styling - ensure all text is visible
+    responseClone.style.cssText = `
+      font-family: 'Times New Roman', serif;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #000000;
+      background-color: #ffffff;
+    `;
+
+    // Style headers - ensure visibility
+    const headers = responseClone.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    headers.forEach(header => {
+      header.style.fontFamily = "'Times New Roman', serif";
+      header.style.fontWeight = 'bold';
+      header.style.marginTop = '12px';
+      header.style.marginBottom = '6px';
+      header.style.color = '#000000';
+      header.style.pageBreakAfter = 'avoid';
+    });
+
+    // Style lists
+    const lists = responseClone.querySelectorAll('ul, ol');
+    lists.forEach(list => {
+      list.style.margin = '6px 0';
+      list.style.paddingLeft = '15px';
+      list.style.color = '#000000';
+    });
+
+    const listItems = responseClone.querySelectorAll('li');
+    listItems.forEach(item => {
+      item.style.marginBottom = '3px';
+      item.style.color = '#000000';
+    });
+
+    // Style paragraphs
+    const paragraphs = responseClone.querySelectorAll('p');
+    paragraphs.forEach(p => {
+      p.style.margin = '6px 0';
+      p.style.textAlign = 'justify';
+      p.style.color = '#000000';
+    });
+
+    // Style strong/bold text
+    const strongElements = responseClone.querySelectorAll('strong, b');
+    strongElements.forEach(strong => {
+      strong.style.color = '#000000';
+      strong.style.fontWeight = 'bold';
+    });
+
+    // Style emphasis/italic text
+    const emphasisElements = responseClone.querySelectorAll('em, i');
+    emphasisElements.forEach(em => {
+      em.style.color = '#000000';
+      em.style.fontStyle = 'italic';
+    });
+
+    // Style code blocks
+    const codeBlocks = responseClone.querySelectorAll('pre');
+    codeBlocks.forEach(code => {
+      code.style.background = '#f5f5f5';
+      code.style.padding = '8px';
+      code.style.border = '1px solid #cccccc';
+      code.style.borderRadius = '2px';
+      code.style.fontSize = '9px';
+      code.style.overflow = 'visible';
+      code.style.whiteSpace = 'pre-wrap';
+      code.style.wordWrap = 'break-word';
+      code.style.color = '#000000';
+      code.style.margin = '8px 0';
+    });
+
+    const inlineCode = responseClone.querySelectorAll('code');
+    inlineCode.forEach(code => {
+      if (!code.closest('pre')) {
+        code.style.background = '#f0f0f0';
+        code.style.padding = '1px 3px';
+        code.style.borderRadius = '2px';
+        code.style.fontSize = '10px';
+        code.style.color = '#000000';
+      }
+    });
+
+    analysisSection.appendChild(responseClone);
+
+    // Add footer
+    const footer = document.createElement('div');
+    footer.style.cssText = `
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      font-size: 10px;
+      color: #666;
+    `;
+
+    const disclaimer = document.createElement('p');
+    disclaimer.innerHTML = `
+      <strong>Disclaimer:</strong> This analysis is generated by AI and should not be considered legal advice.
+      Always consult with qualified legal professionals for official legal matters.
+      Generated by LawAI - Intelligent Legal Assistant.
+    `;
+    disclaimer.style.cssText = `
+      margin: 0;
+      line-height: 1.3;
+    `;
+
+    footer.appendChild(disclaimer);
+
+    // Assemble the PDF
+    pdfContainer.appendChild(header);
+    pdfContainer.appendChild(querySection);
+    pdfContainer.appendChild(analysisSection);
+    pdfContainer.appendChild(footer);
+
+    return pdfContainer;
+  }
 
   // Initialize theme on page load
   initTheme();
