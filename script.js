@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const MIN_REQUEST_INTERVAL = 5000; // 5 seconds between requests
   let isRequestInProgress = false;
 
+  // Store last query and response for PDF generation
+  let lastQueryText = '';
+  let lastResponseHTML = '';
+
   // Theme management
   function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -334,6 +338,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const parsedResponse = parseMarkdownToHTML(responseText);
 
+      // Store for PDF generation
+      lastQueryText = query;
+      lastResponseHTML = parsedResponse;
+
       // Display response with animation
       responseBox.innerHTML = parsedResponse;
       responseBox.style.animation = 'fadeIn 0.6s ease-out';
@@ -428,9 +436,11 @@ document.addEventListener('DOMContentLoaded', function() {
       isRequestInProgress = false;
     }
 
-    // Clear the input field after submission
-    queryInput.value = '';
-    updateCharCount();
+    // Clear the input field after submission (only if successful)
+    if (!error) {
+      queryInput.value = '';
+      updateCharCount();
+    }
   });
 
   // PDF Download functionality
@@ -442,25 +452,26 @@ document.addEventListener('DOMContentLoaded', function() {
       downloadPdf.disabled = true;
 
       // Create PDF content
-      const pdfContent = createPDFContent(queryInput.value);
+      const pdfContent = createPDFContent();
+
+      // Debug: Check if content exists
+      console.log('PDF Content generated:', pdfContent);
+      console.log('PDF Content HTML:', pdfContent.outerHTML);
 
       // Generate PDF with proper options
       const opt = {
-        margin: [10, 10, 10, 10], // top, left, bottom, right margins (reduced)
-        filename: `LawAI_Analysis_${new Date().toISOString().split('T')[0]}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        margin: 1,
+        filename: `LawAI_Report_${Date.now()}.pdf`,
         html2canvas: {
           scale: 2,
-          useCORS: true,
-          letterRendering: true,
-          backgroundColor: '#ffffff' // Ensure white background
+          backgroundColor: '#ffffff',
+          useCORS: true
         },
         jsPDF: {
-          unit: 'mm',
+          unit: 'in',
           format: 'a4',
           orientation: 'portrait'
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        }
       };
 
       // Generate and download PDF
@@ -481,100 +492,84 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Function to create PDF content
-  function createPDFContent(originalQuery) {
+  function createPDFContent() {
+    // Create a clean container for PDF content
     const pdfContainer = document.createElement('div');
     pdfContainer.style.cssText = `
       font-family: 'Times New Roman', serif;
       font-size: 12px;
-      line-height: 1.4;
-      color: #000000;
-      background-color: #ffffff;
-      max-width: 190mm;
-      margin: 0;
+      line-height: 1.5;
+      color: #000000 !important;
+      background-color: #ffffff !important;
       padding: 0;
       width: 100%;
+      margin: 0;
       box-sizing: border-box;
+      position: relative;
+      visibility: visible;
+      opacity: 1;
     `;
 
     // Add header
     const header = document.createElement('div');
     header.style.cssText = `
       text-align: center;
+      margin-bottom: 20px;
       border-bottom: 2px solid #000000;
       padding-bottom: 10px;
-      margin-bottom: 15px;
       page-break-after: avoid;
     `;
 
     const title = document.createElement('h1');
-    title.textContent = 'LawAI Legal Analysis Report';
+    title.textContent = 'LawAI - Legal Analysis Report';
     title.style.cssText = `
-      font-size: 20px;
+      font-size: 24px;
       font-weight: bold;
-      margin: 0 0 8px 0;
+      margin: 0;
       color: #000000;
-      font-family: 'Times New Roman', serif;
-    `;
-
-    const subtitle = document.createElement('p');
-    subtitle.textContent = 'Intelligent Legal Assistant for Law Enforcement';
-    subtitle.style.cssText = `
-      font-size: 12px;
-      color: #333333;
-      margin: 0 0 8px 0;
       font-family: 'Times New Roman', serif;
     `;
 
     const date = document.createElement('p');
-    date.textContent = `Generated on: ${new Date().toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })}`;
+    date.textContent = `Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
     date.style.cssText = `
       font-size: 10px;
+      margin: 5px 0 0 0;
       color: #666666;
-      margin: 0;
       font-family: 'Times New Roman', serif;
     `;
 
     header.appendChild(title);
-    header.appendChild(subtitle);
     header.appendChild(date);
 
-    // Add original query section
+    // Add query section
     const querySection = document.createElement('div');
-    querySection.style.cssText = `
-      margin-bottom: 15px;
-      background: #f8f9fa;
-      padding: 12px;
-      border-radius: 3px;
-      border: 1px solid #dddddd;
-      page-break-inside: avoid;
-    `;
+    querySection.style.cssText = `margin-bottom: 20px;`;
 
     const queryTitle = document.createElement('h2');
-    queryTitle.textContent = 'Original Query';
+    queryTitle.textContent = 'Legal Query';
     queryTitle.style.cssText = `
-      font-size: 14px;
+      font-size: 16px;
       font-weight: bold;
-      margin: 0 0 8px 0;
+      margin: 0 0 10px 0;
       color: #000000;
       border-bottom: 1px solid #cccccc;
-      padding-bottom: 3px;
+      padding-bottom: 5px;
       font-family: 'Times New Roman', serif;
+      page-break-after: avoid;
     `;
 
     const queryText = document.createElement('p');
-    queryText.textContent = originalQuery || 'N/A';
+    queryText.textContent = lastQueryText || 'N/A';
     queryText.style.cssText = `
       margin: 0;
-      font-size: 11px;
-      line-height: 1.4;
+      font-size: 12px;
+      line-height: 1.5;
       color: #000000;
       font-family: 'Times New Roman', serif;
+      background-color: #f9f9f9;
+      padding: 10px;
+      border-radius: 4px;
     `;
 
     querySection.appendChild(queryTitle);
@@ -582,14 +577,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add analysis section
     const analysisSection = document.createElement('div');
-    analysisSection.style.cssText = `margin-bottom: 15px;`;
+    analysisSection.style.cssText = `margin-bottom: 20px;`;
 
     const analysisTitle = document.createElement('h2');
     analysisTitle.textContent = 'Legal Analysis Results';
     analysisTitle.style.cssText = `
       font-size: 16px;
       font-weight: bold;
-      margin: 0 0 12px 0;
+      margin: 0 0 15px 0;
       color: #000000;
       border-bottom: 1px solid #cccccc;
       padding-bottom: 5px;
@@ -599,123 +594,152 @@ document.addEventListener('DOMContentLoaded', function() {
 
     analysisSection.appendChild(analysisTitle);
 
-    // Clone and clean the response content
-    const responseClone = responseBox.cloneNode(true);
-
-    // Remove any interactive elements or styling that won't work in PDF
-    const buttons = responseClone.querySelectorAll('button');
-    buttons.forEach(button => button.remove());
-
-    const links = responseClone.querySelectorAll('a');
-    links.forEach(link => {
-      link.style.color = '#000';
-      link.style.textDecoration = 'underline';
-    });
-
-    // Apply PDF-friendly styling - ensure all text is visible
-    responseClone.style.cssText = `
+    // Create clean analysis content from stored HTML
+    const analysisContent = document.createElement('div');
+    analysisContent.innerHTML = lastResponseHTML || '<p>No analysis available</p>';
+    analysisContent.style.cssText = `
       font-family: 'Times New Roman', serif;
-      font-size: 11px;
-      line-height: 1.4;
-      color: #000000;
-      background-color: #ffffff;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #000000 !important;
+      background-color: #ffffff !important;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100px;
     `;
 
-    // Style headers - ensure visibility
-    const headers = responseClone.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    headers.forEach(header => {
-      header.style.fontFamily = "'Times New Roman', serif";
-      header.style.fontWeight = 'bold';
-      header.style.marginTop = '12px';
-      header.style.marginBottom = '6px';
-      header.style.color = '#000000';
-      header.style.pageBreakAfter = 'avoid';
-    });
+    // Apply clean styling to all elements
+    const allElements = analysisContent.querySelectorAll('*');
+    allElements.forEach(element => {
+      // Reset all styling to ensure clean PDF output
+      element.style.cssText = `
+        font-family: 'Times New Roman', serif !important;
+        color: #000000 !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+      `;
 
-    // Style lists
-    const lists = responseClone.querySelectorAll('ul, ol');
-    lists.forEach(list => {
-      list.style.margin = '6px 0';
-      list.style.paddingLeft = '15px';
-      list.style.color = '#000000';
-    });
-
-    const listItems = responseClone.querySelectorAll('li');
-    listItems.forEach(item => {
-      item.style.marginBottom = '3px';
-      item.style.color = '#000000';
-    });
-
-    // Style paragraphs
-    const paragraphs = responseClone.querySelectorAll('p');
-    paragraphs.forEach(p => {
-      p.style.margin = '6px 0';
-      p.style.textAlign = 'justify';
-      p.style.color = '#000000';
-    });
-
-    // Style strong/bold text
-    const strongElements = responseClone.querySelectorAll('strong, b');
-    strongElements.forEach(strong => {
-      strong.style.color = '#000000';
-      strong.style.fontWeight = 'bold';
-    });
-
-    // Style emphasis/italic text
-    const emphasisElements = responseClone.querySelectorAll('em, i');
-    emphasisElements.forEach(em => {
-      em.style.color = '#000000';
-      em.style.fontStyle = 'italic';
-    });
-
-    // Style code blocks
-    const codeBlocks = responseClone.querySelectorAll('pre');
-    codeBlocks.forEach(code => {
-      code.style.background = '#f5f5f5';
-      code.style.padding = '8px';
-      code.style.border = '1px solid #cccccc';
-      code.style.borderRadius = '2px';
-      code.style.fontSize = '9px';
-      code.style.overflow = 'visible';
-      code.style.whiteSpace = 'pre-wrap';
-      code.style.wordWrap = 'break-word';
-      code.style.color = '#000000';
-      code.style.margin = '8px 0';
-    });
-
-    const inlineCode = responseClone.querySelectorAll('code');
-    inlineCode.forEach(code => {
-      if (!code.closest('pre')) {
-        code.style.background = '#f0f0f0';
-        code.style.padding = '1px 3px';
-        code.style.borderRadius = '2px';
-        code.style.fontSize = '10px';
-        code.style.color = '#000000';
+      // Specific styling based on element type
+      switch (element.tagName.toLowerCase()) {
+        case 'h1':
+        case 'h2':
+        case 'h3':
+        case 'h4':
+        case 'h5':
+        case 'h6':
+          element.style.cssText += `
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            page-break-after: avoid;
+            color: #000000 !important;
+          `;
+          break;
+        case 'p':
+          element.style.cssText += `
+            margin: 8px 0;
+            text-align: justify;
+            color: #000000 !important;
+          `;
+          break;
+        case 'ul':
+        case 'ol':
+          element.style.cssText += `
+            margin: 8px 0;
+            padding-left: 20px;
+            color: #000000 !important;
+          `;
+          break;
+        case 'li':
+          element.style.cssText += `
+            margin-bottom: 4px;
+            color: #000000 !important;
+          `;
+          break;
+        case 'strong':
+        case 'b':
+          element.style.cssText += `
+            font-weight: bold;
+            color: #000000 !important;
+          `;
+          break;
+        case 'em':
+        case 'i':
+          element.style.cssText += `
+            font-style: italic;
+            color: #000000 !important;
+          `;
+          break;
+        case 'pre':
+          element.style.cssText += `
+            background: #f5f5f5 !important;
+            padding: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-size: 10px;
+            overflow: visible;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #000000 !important;
+            margin: 10px 0;
+          `;
+          break;
+        case 'code':
+          if (!element.closest('pre')) {
+            element.style.cssText += `
+              background: #f0f0f0 !important;
+              padding: 2px 4px;
+              border-radius: 2px;
+              font-size: 11px;
+              color: #000000 !important;
+            `;
+          }
+          break;
+        case 'a':
+          element.style.cssText += `
+            color: #000000 !important;
+            text-decoration: underline;
+          `;
+          break;
+        case 'blockquote':
+          element.style.cssText += `
+            border-left: 4px solid #cccccc;
+            padding-left: 10px;
+            margin: 10px 0;
+            font-style: italic;
+            color: #000000 !important;
+          `;
+          break;
       }
     });
 
-    analysisSection.appendChild(responseClone);
+    analysisSection.appendChild(analysisContent);
 
     // Add footer
     const footer = document.createElement('div');
     footer.style.cssText = `
       margin-top: 30px;
       padding-top: 15px;
-      border-top: 1px solid #e2e8f0;
+      border-top: 1px solid #cccccc;
       text-align: center;
       font-size: 10px;
-      color: #666;
+      color: #666666;
+      font-family: 'Times New Roman', serif;
     `;
 
     const disclaimer = document.createElement('p');
     disclaimer.innerHTML = `
       <strong>Disclaimer:</strong> This analysis is generated by AI and should not be considered legal advice.
-      Always consult with qualified legal professionals for official legal matters.
-      Generated by LawAI - Intelligent Legal Assistant.
+      Always consult with qualified legal professionals for official legal matters.<br>
+      Generated by LawAI - Intelligent Legal Assistant on ${new Date().toLocaleString()}.
     `;
     disclaimer.style.cssText = `
       margin: 0;
-      line-height: 1.3;
+      line-height: 1.4;
+      color: #666666;
+      font-family: 'Times New Roman', serif;
     `;
 
     footer.appendChild(disclaimer);
@@ -767,20 +791,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Escape to close modal
     if (e.key === 'Escape' && modal.classList.contains('show')) {
       modal.classList.remove('show');
-    }
-  });
-
-  // Add loading state to submit button
-  submitQuery.addEventListener('click', function() {
-    if (!this.disabled) {
-      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
-      this.disabled = true;
-
-      // Re-enable after processing starts
-      setTimeout(() => {
-        this.innerHTML = '<i class="fas fa-search"></i> Analyze Incident';
-        this.disabled = false;
-      }, 1000);
     }
   });
 
