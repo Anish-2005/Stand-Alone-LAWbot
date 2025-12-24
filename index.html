@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://js.puter.com/v2/"></script>
   <link rel="stylesheet" href="styles.css">
   <title>LawAI - Intelligent Legal Assistant</title>
 </head>
@@ -19,10 +20,10 @@
     <header class="app-header">
       <div class="header-content">
         <div class="logo-section">
-          <i class="fas fa-balance-scale logo-icon"></i>
+          <i class="fas fa-balance-scale logo-icon pulse"></i>
           <div class="logo-text">
             <h1>LawAI</h1>
-            <p>Intelligent Legal Assistant</p>
+            <p>Sandbox Model</p>
           </div>
         </div>
         <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
@@ -35,14 +36,14 @@
     <main class="main-content">
       <!-- Hero Section -->
       <section class="hero-section">
-        <h1 class="hero-title">Legal Intelligence at Your Fingertips</h1>
-        <p class="hero-subtitle">Analyze criminal incidents and get comprehensive legal guidance powered by advanced AI</p>
+        <h1 class="hero-title slide-up">Legal Intelligence at Your Fingertips</h1>
+        <p class="hero-subtitle fade-in" style="animation-delay: 0.2s;">Analyze criminal incidents and get comprehensive legal guidance powered by advanced AI</p>
         <div class="hero-actions">
-          <button id="infoButton" class="btn-primary">
+          <button id="infoButton" class="btn-primary bounce-in" style="animation-delay: 0.4s;">
             <i class="fas fa-info-circle"></i>
             How It Works
           </button>
-          <button id="scrollToQuery" class="btn-secondary">
+          <button id="scrollToQuery" class="btn-secondary scale-in" style="animation-delay: 0.5s;">
             <i class="fas fa-arrow-down"></i>
             Get Started
           </button>
@@ -51,23 +52,23 @@
 
       <!-- Content Grid -->
       <section class="content-grid">
-        <div class="content-card fade-in">
-          <i class="fas fa-brain card-icon"></i>
+        <div class="content-card fade-in" style="animation-delay: 0.1s;">
+          <i class="fas fa-brain card-icon float"></i>
           <h3 class="card-title">AI-Powered Analysis</h3>
           <p class="card-description">Advanced machine learning algorithms analyze incident descriptions to identify all applicable laws, acts, and sections with precision and accuracy.</p>
         </div>
-        <div class="content-card fade-in">
-          <i class="fas fa-shield-alt card-icon"></i>
+        <div class="content-card fade-in" style="animation-delay: 0.2s;">
+          <i class="fas fa-shield-alt card-icon float"></i>
           <h3 class="card-title">Comprehensive Coverage</h3>
           <p class="card-description">Complete knowledge base covering the Indian Constitution, Criminal Procedure Code, Indian Penal Code, and all relevant legal provisions.</p>
         </div>
-        <div class="content-card fade-in">
-          <i class="fas fa-clock card-icon"></i>
+        <div class="content-card fade-in" style="animation-delay: 0.3s;">
+          <i class="fas fa-clock card-icon float"></i>
           <h3 class="card-title">Instant Results</h3>
           <p class="card-description">Get detailed legal analysis in seconds, enabling law enforcement officers to file complete and legally sound FIRs efficiently.</p>
         </div>
-        <div class="content-card fade-in">
-          <i class="fas fa-users card-icon"></i>
+        <div class="content-card fade-in" style="animation-delay: 0.4s;">
+          <i class="fas fa-users card-icon float"></i>
           <h3 class="card-title">Officer Support</h3>
           <p class="card-description">Designed specifically for law enforcement officers to ensure no legal provision is overlooked in the FIR filing process.</p>
         </div>
@@ -76,10 +77,10 @@
       <!-- Query Section -->
       <section id="querySection" class="query-section">
         <div class="query-header">
-          <h2 class="query-title">Legal Query Analysis</h2>
-          <p class="query-subtitle">Describe the criminal incident to receive comprehensive legal guidance</p>
+          <h2 class="query-title slide-in">Legal Query Analysis</h2>
+          <p class="query-subtitle fade-in" style="animation-delay: 0.1s;">Describe the criminal incident to receive comprehensive legal guidance</p>
         </div>
-        <form class="query-form">
+        <form class="query-form slide-in-right" style="animation-delay: 0.2s;">
           <div class="form-group">
             <label for="queryInput" class="form-label">
               <i class="fas fa-edit"></i>
@@ -106,12 +107,12 @@
       <!-- Response Section -->
       <section class="response-section">
         <div class="response-header">
-          <h3 class="response-title">
+          <h3 class="response-title slide-in">
             <i class="fas fa-file-alt"></i>
             Legal Analysis Results
           </h3>
         </div>
-        <div id="responseBox" class="response-content">
+        <div id="responseBox" class="response-content scale-in" style="animation-delay: 0.1s;">
           <div class="response-placeholder">
             <i class="fas fa-search placeholder-icon"></i>
             <h4>Your legal analysis will appear here</h4>
