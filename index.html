@@ -6,7 +6,7 @@
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://js.puter.com/v2/"></script>
@@ -17,87 +17,133 @@
 
 <body>
   <div class="app-container">
-    <!-- Header -->
     <header class="app-header">
       <div class="header-content">
         <div class="logo-section">
-          <i class="fas fa-balance-scale logo-icon pulse"></i>
+          <i class="fas fa-gavel logo-icon pulse"></i>
           <div class="logo-text">
             <h1>LawAI</h1>
-            <p>Sandbox Model</p>
+            <p>Operational Intelligence Console</p>
           </div>
         </div>
-        <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
-          <i class="fas fa-moon"></i>
-        </button>
+        <div class="header-actions">
+          <div class="status-badge" aria-label="Service status">
+            <span class="status-dot"></span>
+            Service Operational
+          </div>
+          <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
       </div>
     </header>
 
-    <!-- Main Content -->
     <main class="main-content">
-      <!-- Hero Section -->
       <section class="hero-section">
-        <h1 class="hero-title slide-up">Legal Intelligence at Your Fingertips</h1>
-        <p class="hero-subtitle fade-in" style="animation-delay: 0.2s;">Analyze criminal incidents and get comprehensive legal guidance powered by advanced AI</p>
-        <div class="hero-actions">
-          <button id="infoButton" class="btn-primary bounce-in" style="animation-delay: 0.4s;">
-            <i class="fas fa-info-circle"></i>
-            How It Works
-          </button>
-          <button id="scrollToQuery" class="btn-secondary scale-in" style="animation-delay: 0.5s;">
-            <i class="fas fa-arrow-down"></i>
-            Get Started
-          </button>
+        <div class="hero-grid">
+          <div class="hero-content">
+            <p class="hero-eyebrow">AI-Assisted FIR Drafting</p>
+            <h1 class="hero-title slide-up">Professional Legal Analysis for High-Accuracy Incident Reporting</h1>
+            <p class="hero-subtitle fade-in" style="animation-delay: 0.2s;">Analyze incident narratives against relevant Indian legal provisions with fast, structured, and actionable legal mapping.</p>
+            <div class="hero-actions">
+              <button id="infoButton" class="btn-primary bounce-in" style="animation-delay: 0.35s;">
+                <i class="fas fa-circle-info"></i>
+                How It Works
+              </button>
+              <button id="scrollToQuery" class="btn-secondary scale-in" style="animation-delay: 0.45s;">
+                <i class="fas fa-arrow-down"></i>
+                Start Analysis
+              </button>
+            </div>
+            <div class="hero-metrics fade-in" style="animation-delay: 0.5s;">
+              <div class="metric-item">
+                <span class="metric-value">Comprehensive</span>
+                <span class="metric-label">Law Coverage</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-value">Structured</span>
+                <span class="metric-label">Output Format</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-value">Fast</span>
+                <span class="metric-label">Turnaround</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="hero-panel fade-in" style="animation-delay: 0.3s;">
+            <h2>Analysis Standards</h2>
+            <ul class="panel-list">
+              <li>
+                <i class="fas fa-check"></i>
+                Identify applicable acts, sections, and clauses.
+              </li>
+              <li>
+                <i class="fas fa-check"></i>
+                Explain legal relevance in incident context.
+              </li>
+              <li>
+                <i class="fas fa-check"></i>
+                Support complete and legally sound FIR drafting.
+              </li>
+            </ul>
+            <div class="panel-note">
+              <i class="fas fa-shield-halved"></i>
+              Designed for law-enforcement support workflows.
+            </div>
+          </aside>
         </div>
       </section>
 
-      <!-- Content Grid -->
       <section class="content-grid">
-        <div class="content-card fade-in" style="animation-delay: 0.1s;">
-          <i class="fas fa-brain card-icon float"></i>
-          <h3 class="card-title">AI-Powered Analysis</h3>
-          <p class="card-description">Advanced machine learning algorithms analyze incident descriptions to identify all applicable laws, acts, and sections with precision and accuracy.</p>
-        </div>
-        <div class="content-card fade-in" style="animation-delay: 0.2s;">
-          <i class="fas fa-shield-alt card-icon float"></i>
-          <h3 class="card-title">Comprehensive Coverage</h3>
-          <p class="card-description">Complete knowledge base covering the Indian Constitution, Criminal Procedure Code, Indian Penal Code, and all relevant legal provisions.</p>
-        </div>
-        <div class="content-card fade-in" style="animation-delay: 0.3s;">
-          <i class="fas fa-clock card-icon float"></i>
-          <h3 class="card-title">Instant Results</h3>
-          <p class="card-description">Get detailed legal analysis in seconds, enabling law enforcement officers to file complete and legally sound FIRs efficiently.</p>
-        </div>
-        <div class="content-card fade-in" style="animation-delay: 0.4s;">
-          <i class="fas fa-users card-icon float"></i>
-          <h3 class="card-title">Officer Support</h3>
-          <p class="card-description">Designed specifically for law enforcement officers to ensure no legal provision is overlooked in the FIR filing process.</p>
-        </div>
+        <article class="content-card fade-in" style="animation-delay: 0.1s;">
+          <i class="fas fa-brain card-icon"></i>
+          <h3 class="card-title">Contextual Legal Intelligence</h3>
+          <p class="card-description">Transforms plain-language incident narratives into mapped legal references with practical interpretation for report preparation.</p>
+        </article>
+
+        <article class="content-card fade-in" style="animation-delay: 0.2s;">
+          <i class="fas fa-scale-balanced card-icon"></i>
+          <h3 class="card-title">Statute and Section Mapping</h3>
+          <p class="card-description">Surfaces relevant constitutional, penal, and procedural provisions to reduce oversight during initial legal assessment.</p>
+        </article>
+
+        <article class="content-card fade-in" style="animation-delay: 0.3s;">
+          <i class="fas fa-list-check card-icon"></i>
+          <h3 class="card-title">FIR Readiness Support</h3>
+          <p class="card-description">Provides structured legal insights that can be reviewed quickly and translated into complete FIR documentation.</p>
+        </article>
+
+        <article class="content-card fade-in" style="animation-delay: 0.4s;">
+          <i class="fas fa-user-shield card-icon"></i>
+          <h3 class="card-title">Operationally Focused UX</h3>
+          <p class="card-description">Built with an interface optimized for speed, readability, and confidence under real-world law-enforcement conditions.</p>
+        </article>
       </section>
 
-      <!-- Query Section -->
       <section id="querySection" class="query-section">
         <div class="query-header">
-          <h2 class="query-title slide-in">Legal Query Analysis</h2>
-          <p class="query-subtitle fade-in" style="animation-delay: 0.1s;">Describe the criminal incident to receive comprehensive legal guidance</p>
+          <h2 class="query-title slide-in">Incident Query Workspace</h2>
+          <p class="query-subtitle fade-in" style="animation-delay: 0.1s;">Enter a clear incident description to generate legal analysis and section-wise applicability.</p>
+          <div class="query-shortcut">Shortcut: <span>Ctrl/Cmd + Enter</span> to analyze</div>
         </div>
+
         <form class="query-form slide-in-right" style="animation-delay: 0.2s;">
           <div class="form-group">
             <label for="queryInput" class="form-label">
-              <i class="fas fa-edit"></i>
+              <i class="fas fa-pen"></i>
               Incident Description
             </label>
             <textarea
               id="queryInput"
               class="form-input"
-              placeholder="Describe the criminal incident in detail... (e.g., A person was found stealing electronic goods from a shop in the market area)"
+              placeholder="Example: A person was found stealing electronic goods from a shop in a market area and attempted to flee when confronted."
               maxlength="1000"
-              rows="4"
+              rows="5"
             ></textarea>
-            <div class="char-count">
-              <span id="charCount">0</span>/1000 characters
-            </div>
+            <div class="char-count"><span id="charCount">0</span>/1000 characters</div>
           </div>
+
           <button type="submit" id="submitQuery" class="submit-btn" disabled>
             <i class="fas fa-search"></i>
             Analyze Incident
@@ -105,11 +151,10 @@
         </form>
       </section>
 
-      <!-- Response Section -->
       <section class="response-section">
         <div class="response-header">
           <h3 class="response-title slide-in">
-            <i class="fas fa-file-alt"></i>
+            <i class="fas fa-file-lines"></i>
             Legal Analysis Results
           </h3>
           <button id="downloadPdf" class="download-btn" style="display: none;">
@@ -117,26 +162,25 @@
             Download PDF
           </button>
         </div>
+
         <div id="responseBox" class="response-content scale-in" style="animation-delay: 0.1s;">
           <div class="response-placeholder">
-            <i class="fas fa-search placeholder-icon"></i>
-            <h4>Your legal analysis will appear here</h4>
-            <p>Enter an incident description above and click "Analyze Incident" to get started</p>
+            <i class="fas fa-file-magnifying-glass placeholder-icon"></i>
+            <h4>Awaiting Incident Input</h4>
+            <p>Submit an incident description to generate legal section mapping and guidance.</p>
           </div>
         </div>
       </section>
     </main>
 
-    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
       <div class="loading-content">
         <div class="spinner"></div>
         <div class="loading-text">Analyzing Incident...</div>
-        <div class="loading-subtext">Processing your query with advanced AI algorithms</div>
+        <div class="loading-subtext">Generating law-specific guidance for your submission</div>
       </div>
     </div>
 
-    <!-- Modal -->
     <div id="modal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-header">
@@ -144,60 +188,57 @@
             <i class="fas fa-lightbulb"></i>
             How LawAI Works
           </h3>
-          <button id="closeModal" class="modal-close">
+          <button id="closeModal" class="modal-close" aria-label="Close">
             <i class="fas fa-times"></i>
           </button>
         </div>
+
         <div class="modal-body">
-          <p class="mb-6">LawAI is an intelligent legal assistant designed to support law enforcement officers in filing comprehensive First Information Reports (FIRs). Here's how it works:</p>
+          <p class="modal-intro">LawAI helps officers perform early-stage legal assessment by mapping incident descriptions to relevant legal provisions for FIR readiness.</p>
 
           <div class="feature-list">
             <div class="feature-item">
-              <i class="fas fa-edit feature-icon"></i>
+              <i class="fas fa-pen-to-square feature-icon"></i>
               <div class="feature-content">
-                <h4>Describe the Incident</h4>
-                <p>Provide a detailed description of the criminal incident in plain language</p>
+                <h4>1. Input Incident Details</h4>
+                <p>Describe incident facts in plain language with as much factual clarity as possible.</p>
               </div>
             </div>
             <div class="feature-item">
-              <i class="fas fa-brain feature-icon"></i>
+              <i class="fas fa-microchip feature-icon"></i>
               <div class="feature-content">
-                <h4>AI Analysis</h4>
-                <p>Advanced AI algorithms analyze the description against comprehensive legal databases</p>
+                <h4>2. AI-Driven Legal Mapping</h4>
+                <p>The system evaluates context and identifies potentially applicable legal sections.</p>
               </div>
             </div>
             <div class="feature-item">
               <i class="fas fa-gavel feature-icon"></i>
               <div class="feature-content">
-                <h4>Legal Mapping</h4>
-                <p>Identifies all applicable laws, acts, sections, and legal provisions</p>
+                <h4>3. Structured Legal Output</h4>
+                <p>Results are presented with section references and concise significance notes.</p>
               </div>
             </div>
             <div class="feature-item">
-              <i class="fas fa-file-contract feature-icon"></i>
+              <i class="fas fa-file-circle-check feature-icon"></i>
               <div class="feature-content">
-                <h4>Comprehensive Guidance</h4>
-                <p>Provides detailed explanations and ensures complete FIR documentation</p>
+                <h4>4. FIR Support</h4>
+                <p>Use the output as support material while drafting complete FIR documentation.</p>
               </div>
             </div>
           </div>
 
-          <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p class="text-sm text-blue-800 dark:text-blue-200">
-              <i class="fas fa-info-circle mr-2"></i>
-              <strong>Note:</strong> This tool is designed to assist law enforcement officers and should be used as a supplement to professional legal expertise.
-            </p>
+          <div class="modal-note">
+            <i class="fas fa-circle-info"></i>
+            This assistant supports professional workflows and does not replace qualified legal judgment.
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Scroll to Top -->
     <button id="scrollToTop" class="scroll-to-top" aria-label="Scroll to top">
       <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- Footer -->
     <footer class="app-footer">
       <div class="footer-content">
         <div class="footer-grid">
@@ -206,37 +247,35 @@
               <i class="fas fa-balance-scale"></i>
               LawAI
             </h3>
-            <p>Empowering law enforcement with AI-driven legal intelligence for comprehensive FIR filing and justice delivery.</p>
+            <p>Enterprise-grade legal support interface for faster, more complete incident-to-law mapping in law-enforcement workflows.</p>
           </div>
+
           <div class="footer-section">
             <h3>
-              <i class="fas fa-link"></i>
-              Quick Links
+              <i class="fas fa-sitemap"></i>
+              Platform
             </h3>
             <ul class="footer-links">
               <li><a href="#"><i class="fas fa-shield-alt"></i>Privacy Policy</a></li>
               <li><a href="#"><i class="fas fa-file-contract"></i>Terms of Service</a></li>
               <li><a href="#"><i class="fas fa-universal-access"></i>Accessibility</a></li>
-              <li><a href="#"><i class="fas fa-envelope"></i>Contact Support</a></li>
+              <li><a href="#"><i class="fas fa-envelope"></i>Support</a></li>
             </ul>
           </div>
+
           <div class="footer-section">
             <h3>
-              <i class="fas fa-code"></i>
-              Technology
+              <i class="fas fa-gears"></i>
+              System Notes
             </h3>
-            <p>Built with cutting-edge AI technology and modern web standards for reliable legal assistance.</p>
+            <p>Built for performance, clarity, and accuracy with modern web standards and AI-assisted legal reasoning support.</p>
           </div>
         </div>
+
         <div class="footer-bottom">
           <div class="footer-bottom-content">
-            <div class="footer-copyright">
-              &copy; 2024 CODE-A-COLA. All rights reserved.
-            </div>
-            <div class="footer-tagline">
-              <i class="fas fa-heart"></i>
-              Made for a smarter tomorrow
-            </div>
+            <div class="footer-copyright">&copy; 2026 CODE-A-COLA. All rights reserved.</div>
+            <div class="footer-tagline"><i class="fas fa-check-circle"></i>Professional legal-assist workflow</div>
           </div>
         </div>
       </div>

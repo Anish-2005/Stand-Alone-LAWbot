@@ -53,6 +53,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Utility function to parse markdown to HTML
+  const escapeHTML = (unsafe) => String(unsafe)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
   const parseMarkdownToHTML = (text) => {
     // Ensure text is a string
     if (typeof text !== 'string') {
@@ -67,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let listType = '';
 
     for (let i = 0; i < lines.length; i++) {
-      let line = lines[i];
+      let line = escapeHTML(lines[i]);
 
       // Headers
       if (line.match(/^### (.*$)/)) {
@@ -311,6 +318,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Hide download button when starting new query
     downloadPdf.style.display = 'none';
 
+    let requestSucceeded = false;
+
     try {
       const response = await puter.ai.chat(fullQuery, {
         model: 'gemini-2.0-flash'
@@ -348,6 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Show download button
       downloadPdf.style.display = 'flex';
+      requestSucceeded = true;
 
       // Smooth scroll to response
       setTimeout(() => {
@@ -437,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Clear the input field after submission (only if successful)
-    if (!error) {
+    if (requestSucceeded) {
       queryInput.value = '';
       updateCharCount();
     }
@@ -752,12 +762,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     return pdfContainer;
   }
-
-  // Initialize theme on page load
-  initTheme();
-
-  // Initialize character count
-  updateCharCount();
 
   // Add intersection observer for animations
   const observerOptions = {
