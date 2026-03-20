@@ -34,16 +34,45 @@ document.addEventListener('DOMContentLoaded', function() {
   const MAX_HISTORY_ITEMS = 3;
 
   // Theme management
+  let themeTransitionTimeout;
+
   function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeIcon(savedTheme);
   }
 
+  function runThemeTransition() {
+    const root = document.documentElement;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const rect = themeToggle.getBoundingClientRect();
+
+    root.style.setProperty('--theme-origin-x', `${Math.round(rect.left + (rect.width / 2))}px`);
+    root.style.setProperty('--theme-origin-y', `${Math.round(rect.top + (rect.height / 2))}px`);
+
+    if (reduceMotion) return;
+
+    root.classList.remove('theme-transitioning');
+    themeToggle.classList.remove('is-switching');
+
+    // Force reflow so the class can restart cleanly on rapid toggles
+    void root.offsetWidth;
+
+    root.classList.add('theme-transitioning');
+    themeToggle.classList.add('is-switching');
+
+    clearTimeout(themeTransitionTimeout);
+    themeTransitionTimeout = setTimeout(() => {
+      root.classList.remove('theme-transitioning');
+      themeToggle.classList.remove('is-switching');
+    }, 650);
+  }
+
   function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
+    runThemeTransition();
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
     updateThemeIcon(newTheme);
