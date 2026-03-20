@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const scrollToQuery = document.getElementById('scrollToQuery');
   const loadingOverlay = document.getElementById('loadingOverlay');
   const charCount = document.getElementById('charCount');
+  const historyToggle = document.getElementById('historyToggle');
+  const historyList = document.getElementById('historyList');
+  const historyEmpty = document.getElementById('historyEmpty');
+  const clearHistory = document.getElementById('clearHistory');
 
   // Rate limiting
   let lastRequestTime = 0;
@@ -23,6 +27,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Store last query and response for PDF generation
   let lastQueryText = '';
   let lastResponseHTML = '';
+
+  // History management
+  const HISTORY_STORAGE_KEY = 'lawai_search_history';
+  const HISTORY_TOGGLE_KEY = 'lawai_search_history_enabled';
+  const MAX_HISTORY_ITEMS = 3;
 
   // Theme management
   function initTheme() {
@@ -50,6 +59,89 @@ document.addEventListener('DOMContentLoaded', function() {
     const count = queryInput.value.length;
     charCount.textContent = count;
     submitQuery.disabled = count === 0;
+  }
+
+  function getSavedHistory() {
+    try {
+      const saved = localStorage.getItem(HISTORY_STORAGE_KEY);
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.warn('Unable to parse saved history:', error);
+      return [];
+    }
+  }
+
+  function saveHistory(entries) {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(entries.slice(0, MAX_HISTORY_ITEMS)));
+  }
+
+  function isHistoryEnabled() {
+    const savedPreference = localStorage.getItem(HISTORY_TOGGLE_KEY);
+    if (savedPreference === null) return true;
+    return savedPreference === 'true';
+  }
+
+  function updateHistoryToggleState() {
+    historyToggle.checked = isHistoryEnabled();
+  }
+
+  function formatHistoryDate(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleString();
+  }
+
+  function toPlainText(html) {
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    return (temp.textContent || temp.innerText || '').trim();
+  }
+
+  function truncateText(value, limit) {
+    if (value.length <= limit) return value;
+    return `${value.slice(0, limit).trim()}...`;
+  }
+
+  function renderHistory() {
+    const historyEntries = getSavedHistory();
+    historyList.innerHTML = '';
+
+    if (historyEntries.length === 0) {
+      historyEmpty.style.display = 'flex';
+      return;
+    }
+
+    historyEmpty.style.display = 'none';
+
+    historyEntries.forEach((entry, index) => {
+      const item = document.createElement('article');
+      item.className = 'history-item';
+      item.innerHTML = `
+        <div class="history-item-top">
+          <span class="history-time">${escapeHTML(formatHistoryDate(entry.timestamp))}</span>
+          <button class="load-history-btn" type="button" data-history-index="${index}">
+            <i class="fas fa-rotate-right"></i>
+            Load
+          </button>
+        </div>
+        <p class="history-query">${escapeHTML(truncateText(entry.query, 140))}</p>
+        <p class="history-snippet">${escapeHTML(truncateText(toPlainText(entry.responseHTML || ''), 170))}</p>
+      `;
+      historyList.appendChild(item);
+    });
+  }
+
+  function addHistoryItem(query, responseHTML) {
+    const newEntry = {
+      query,
+      responseHTML,
+      timestamp: Date.now()
+    };
+
+    const existing = getSavedHistory().filter(entry => entry.query !== query);
+    const updated = [newEntry, ...existing].slice(0, MAX_HISTORY_ITEMS);
+    saveHistory(updated);
+    renderHistory();
   }
 
   // Utility function to parse markdown to HTML
@@ -206,7 +298,43 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize everything
   initTheme();
   updateCharCount();
+  updateHistoryToggleState();
+  renderHistory();
   showApiLimitsInfo();
+
+  // History controls
+  historyToggle.addEventListener('change', () => {
+    localStorage.setItem(HISTORY_TOGGLE_KEY, String(historyToggle.checked));
+    if (!historyToggle.checked) {
+      return;
+    }
+    renderHistory();
+  });
+
+  clearHistory.addEventListener('click', () => {
+    localStorage.removeItem(HISTORY_STORAGE_KEY);
+    renderHistory();
+  });
+
+  historyList.addEventListener('click', (event) => {
+    const loadButton = event.target.closest('[data-history-index]');
+    if (!loadButton) return;
+
+    const historyEntries = getSavedHistory();
+    const selected = historyEntries[Number(loadButton.dataset.historyIndex)];
+    if (!selected) return;
+
+    queryInput.value = selected.query;
+    updateCharCount();
+    responseBox.innerHTML = selected.responseHTML || '';
+    responseBox.style.animation = 'fadeIn 0.6s ease-out';
+
+    lastQueryText = selected.query;
+    lastResponseHTML = selected.responseHTML || '';
+    downloadPdf.style.display = 'flex';
+    queryInput.focus();
+    responseBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 
   // Modal logic
   infoButton.addEventListener('click', () => {
@@ -358,6 +486,10 @@ document.addEventListener('DOMContentLoaded', function() {
       // Show download button
       downloadPdf.style.display = 'flex';
       requestSucceeded = true;
+
+      if (historyToggle.checked) {
+        addHistoryItem(query, parsedResponse);
+      }
 
       // Smooth scroll to response
       setTimeout(() => {

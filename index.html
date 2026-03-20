@@ -171,6 +171,31 @@
           </div>
         </div>
       </section>
+
+      <section class="history-section">
+        <div class="history-header">
+          <h3 class="history-title">
+            <i class="fas fa-clock-rotate-left"></i>
+            Recent Search History
+          </h3>
+          <div class="history-controls">
+            <label class="history-toggle">
+              <input type="checkbox" id="historyToggle" checked>
+              <span>Store in Local History</span>
+            </label>
+            <button id="clearHistory" class="clear-history-btn" type="button">
+              <i class="fas fa-trash-can"></i>
+              Clear
+            </button>
+          </div>
+        </div>
+        <p class="history-note">Only the 3 most recent search results are saved.</p>
+        <div id="historyList" class="history-list"></div>
+        <div id="historyEmpty" class="history-empty">
+          <i class="fas fa-folder-open"></i>
+          <p>No saved history yet.</p>
+        </div>
+      </section>
     </main>
 
     <div id="loadingOverlay" class="loading-overlay">
